@@ -1,0 +1,5 @@
+# 1Password Service Account token with access to ONE throwaway test vault (read + write).
+# Create it at 1Password.com > Developer > Service Accounts. Never commit the real value.
+OP_TOKEN_TEST=
+# Optional: title of a throwaway item the spike writes to. Created if missing.
+OP_SPIKE_ITEM_TITLE=op-sdk-spike

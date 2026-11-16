@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "op-sdk-spike",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  // Workers cannot compile WASM from bytes, so the SDK core is swapped for a shim
+  // that imports core_bg.wasm as a pre-compiled module. Run `npm run shim` first.
+  "alias": { "@1password/sdk-core": "./shim/core.mjs" },
+  "rules": [{ "type": "CompiledWasm", "globs": ["**/*.wasm"], "fallthrough": true }]
+}

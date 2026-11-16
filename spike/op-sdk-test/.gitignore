@@ -1,0 +1,5 @@
+node_modules/
+.wrangler/
+.dev.vars
+shim/core.mjs
+shim/core_bg.wasm
