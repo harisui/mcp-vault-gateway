@@ -53,7 +53,7 @@ export default {
 
     const items = await timed(steps, "list_items", () => client.items.list(vault.id), (v) => ({ count: v.length }));
     const title = env.OP_SPIKE_ITEM_TITLE ?? "op-sdk-spike";
-    let target = items?.find((i) => i.title === title);
+    let target: { id: string } | undefined = items?.find((i) => i.title === title);
 
     if (!target) {
       const created = await timed(steps, "create_spike_item", () =>
@@ -64,9 +64,15 @@ export default {
           fields: [{ id: "spike_written_at", title: "spike_written_at", fieldType: sdk.ItemFieldType.Text, value: "init" }],
         }),
       );
-      if (created) target = { id: created.id } as typeof target;
+      if (created) target = { id: created.id };
     }
-    if (!target) return Response.json({ coldStart, steps }, { status: 500 });
+    // Read-only tokens cannot create the spike item; fall back to any existing item so the
+    // read and warm-latency steps still run.
+    if (!target && items?.length) target = items[0];
+    if (!target) {
+      await timed(steps, "list_vaults_warm", () => client.vaults.list());
+      return Response.json({ coldStart, isolateAgeMs: Date.now() - isolateStart, steps });
+    }
 
     const item = await timed(steps, "get_item", () => client.items.get(vault.id, target!.id), (v) => ({ fields: v.fields.length, version: v.version }));
     await timed(steps, "read_one_field", async () => {
@@ -75,7 +81,7 @@ export default {
       return f.value.length;
     }, (len) => ({ valueLength: len }));
 
-    if (item) {
+    if (item && item.title === title) {
       const stamp = new Date().toISOString();
       const fields = item.fields.some((f) => f.id === "spike_written_at")
         ? item.fields.map((f) => (f.id === "spike_written_at" ? { ...f, value: stamp } : f))
