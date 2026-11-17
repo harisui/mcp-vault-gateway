@@ -1,0 +1,39 @@
+{
+  "name": "mcp-vault-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "One MCP endpoint per trust zone in front of all your MCP servers, with credentials in 1Password.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "shim": "node scripts/build-op-shim.mjs",
+    "dev": "wrangler dev --env personal",
+    "dev:client": "wrangler dev --env client",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "gen-key": "tsx scripts/generate-access-key.ts",
+    "deploy:personal": "wrangler deploy --env personal",
+    "deploy:client": "wrangler deploy --env client"
+  },
+  "dependencies": {
+    "@1password/sdk": "^0.5.0",
+    "@cloudflare/workers-oauth-provider": "^1.2.4",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.9.0",
+    "@cloudflare/workers-types": "^5.20261123.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.12",
+    "wrangler": "^4.166.0"
+  },
+  "allowScripts": {
+    "workerd@1.20261119.1": true,
+    "esbuild@0.28.2": true
+  }
+}

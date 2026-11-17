@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // One codebase, two Workers. Always deploy with --env personal or --env client.
+  // The two environments share NOTHING at runtime: separate KV namespaces, Durable Objects,
+  // secrets and encryption keys.
+  "name": "mcp-vault-gateway",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "env": {
+    "personal": {
+      "name": "mcp-personal-server",
+      "vars": {
+        "PUBLIC_URL": "https://mcp-personal-server.<your-subdomain>.workers.dev"
+      },
+      "kv_namespaces": [
+        { "binding": "OAUTH_KV", "id": "<personal-oauth-kv-id>" },
+        { "binding": "CACHE_KV", "id": "<personal-cache-kv-id>" }
+      ]
+    },
+    "client": {
+      "name": "mcp-client-server",
+      "vars": {
+        "PUBLIC_URL": "https://mcp-client-server.<your-subdomain>.workers.dev"
+      },
+      "kv_namespaces": [
+        { "binding": "OAUTH_KV", "id": "<client-oauth-kv-id>" },
+        { "binding": "CACHE_KV", "id": "<client-cache-kv-id>" }
+      ]
+    }
+  }
+}
