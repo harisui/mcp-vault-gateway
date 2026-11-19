@@ -8,11 +8,22 @@
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
 
+  // The 1Password SDK core is WASM that Node loads from disk at runtime, which Workers forbid.
+  // scripts/build-op-shim.mjs rewrites it to import the .wasm as a pre-compiled module.
+  "build": { "command": "node scripts/build-op-shim.mjs" },
+  "alias": { "@1password/sdk-core": "./src/onepassword/vendor/core.mjs" },
+  "rules": [{ "type": "CompiledWasm", "globs": ["**/*.wasm"], "fallthrough": true }],
+
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["CounterDO"] }],
+
   "env": {
     "personal": {
       "name": "mcp-personal-server",
       "vars": {
         "PUBLIC_URL": "https://mcp-personal-server.<your-subdomain>.workers.dev"
+      },
+      "durable_objects": {
+        "bindings": [{ "name": "COUNTER_DO", "class_name": "CounterDO" }]
       },
       "kv_namespaces": [
         { "binding": "OAUTH_KV", "id": "<personal-oauth-kv-id>" },
@@ -23,6 +34,9 @@
       "name": "mcp-client-server",
       "vars": {
         "PUBLIC_URL": "https://mcp-client-server.<your-subdomain>.workers.dev"
+      },
+      "durable_objects": {
+        "bindings": [{ "name": "COUNTER_DO", "class_name": "CounterDO" }]
       },
       "kv_namespaces": [
         { "binding": "OAUTH_KV", "id": "<client-oauth-kv-id>" },
