@@ -108,3 +108,15 @@ describe("tool enforcement", () => {
     expect(checkTool(grant({ allowDestructive: true }), ["remove_*"], { name: "remove_user", annotations: { destructiveHint: true } }).allowed).toBe(false);
   });
 });
+
+describe("glob patterns", () => {
+  it("treats regex characters in patterns literally", () => {
+    expect(checkTool(grant({ blockedTools: ["admin.reset"] }), [], { name: "adminXreset" }).allowed).toBe(true);
+    expect(checkTool(grant({ blockedTools: ["admin.reset"] }), [], { name: "admin.reset" }).allowed).toBe(false);
+    expect(checkTool(grant({ blockedTools: ["run(sql)*"] }), [], { name: "run(sql)_now" }).allowed).toBe(false);
+  });
+
+  it("supports ? for a single character", () => {
+    expect(checkTool(grant({ blockedTools: ["v?_delete"] }), [], { name: "v2_delete" }).allowed).toBe(false);
+  });
+});

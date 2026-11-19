@@ -1,6 +1,10 @@
 /** Case-insensitive glob match supporting `*` (any run) and `?` (one char). */
 export function globToRegExp(pattern: string): RegExp {
-  const body = pattern.trim().replace(/\*/g, ".*").replace(/\?/g, ".");
+  const body = pattern
+    .trim()
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+    .replace(/\*/g, ".*")
+    .replace(/\?/g, ".");
   return new RegExp(`^${body}$`, "i");
 }
 
