@@ -1,0 +1,68 @@
+import { OAuthProvider } from "@cloudflare/workers-oauth-provider";
+import { getApp } from "./app";
+import { parseAccessKey, verifyAccessKey } from "./auth/access-keys";
+import { handleAuthRoute } from "./auth/authorize";
+import type { Env } from "./env";
+import { mcpApiHandler } from "./mcp/handler";
+import { messagePage } from "./util/html";
+import { errorInfo, log } from "./util/log";
+
+export { CounterDO } from "./util/counter-do";
+
+const ACCESS_TOKEN_TTL_S = 3600; // spec: 1 hour max
+const REFRESH_TOKEN_TTL_S = 30 * 86_400;
+
+const defaultHandler = {
+  async fetch(req: Request, env: Env): Promise<Response> {
+    const app = await getApp(env);
+    const path = new URL(req.url).pathname;
+    const auth = await handleAuthRoute(req, app, path);
+    if (auth) return auth;
+    return messagePage("Not found", "Nothing here.", 404);
+  },
+};
+
+let provider: { url: string; instance: OAuthProvider<Env> } | undefined;
+
+function getProvider(publicUrl: string): OAuthProvider<Env> {
+  if (provider?.url === publicUrl) return provider.instance;
+  const instance = new OAuthProvider<Env>({
+    apiRoute: "/mcp",
+    apiHandler: mcpApiHandler,
+    defaultHandler,
+    authorizeEndpoint: "/authorize",
+    tokenEndpoint: "/token",
+    clientRegistrationEndpoint: "/register",
+    accessTokenTTL: ACCESS_TOKEN_TTL_S,
+    refreshTokenTTL: REFRESH_TOKEN_TTL_S,
+    scopesSupported: ["mcp"],
+    resourceMetadata: { resource: `${publicUrl}/mcp`, resource_name: "MCP Vault Gateway" },
+    // Gateway access keys (mcpk_...). These are keys issued by this gateway, not upstream tokens.
+    resolveExternalToken: async ({ token, env }) => {
+      if (!parseAccessKey(token)) return null;
+      const app = await getApp(env as Env);
+      const caller = await verifyAccessKey(token, await app.registry.getAll());
+      if (!caller) {
+        log("warn", "auth.key_rejected", {});
+        return null;
+      }
+      return { props: { caller }, audience: `${publicUrl}/mcp` };
+    },
+  });
+  provider = { url: publicUrl, instance };
+  return instance;
+}
+
+export default {
+  async fetch(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    let publicUrl: string;
+    try {
+      publicUrl = (await getApp(env)).publicUrl;
+    } catch (e) {
+      // Bad or missing ENCRYPTION_KEY_V*, PUBLIC_URL, ...: refuse to run.
+      log("error", "config.invalid", { error: errorInfo(e) });
+      return messagePage("Gateway misconfigured", "The gateway is not configured correctly. Check the Worker logs.", 503);
+    }
+    return getProvider(publicUrl).fetch(req, env, ctx);
+  },
+} satisfies ExportedHandler<Env>;
