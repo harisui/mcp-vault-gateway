@@ -7,6 +7,7 @@ import { mcpApiHandler } from "./mcp/handler";
 import { messagePage } from "./util/html";
 import { errorInfo, log } from "./util/log";
 
+export { ServerDO } from "./proxy/server-do";
 export { CounterDO } from "./util/counter-do";
 
 const ACCESS_TOKEN_TTL_S = 3600; // spec: 1 hour max

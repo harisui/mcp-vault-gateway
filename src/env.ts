@@ -1,4 +1,5 @@
 import type { OAuthHelpers } from "@cloudflare/workers-oauth-provider";
+import type { ServerDO } from "./proxy/server-do";
 import type { CounterDO } from "./util/counter-do";
 
 /**
@@ -9,6 +10,7 @@ export interface Env {
   OAUTH_KV: KVNamespace;
   CACHE_KV: KVNamespace;
   COUNTER_DO: DurableObjectNamespace<CounterDO>;
+  SERVER_DO: DurableObjectNamespace<ServerDO>;
 
   /** Injected by workers-oauth-provider for the default handler. */
   OAUTH_PROVIDER: OAuthHelpers;

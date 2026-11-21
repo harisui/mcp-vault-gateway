@@ -14,7 +14,7 @@
   "alias": { "@1password/sdk-core": "./src/onepassword/vendor/core.mjs" },
   "rules": [{ "type": "CompiledWasm", "globs": ["**/*.wasm"], "fallthrough": true }],
 
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["CounterDO"] }],
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["CounterDO", "ServerDO"] }],
 
   "env": {
     "personal": {
@@ -23,7 +23,10 @@
         "PUBLIC_URL": "https://mcp-personal-server.<your-subdomain>.workers.dev"
       },
       "durable_objects": {
-        "bindings": [{ "name": "COUNTER_DO", "class_name": "CounterDO" }]
+        "bindings": [
+          { "name": "COUNTER_DO", "class_name": "CounterDO" },
+          { "name": "SERVER_DO", "class_name": "ServerDO" }
+        ]
       },
       "kv_namespaces": [
         { "binding": "OAUTH_KV", "id": "<personal-oauth-kv-id>" },
@@ -36,7 +39,10 @@
         "PUBLIC_URL": "https://mcp-client-server.<your-subdomain>.workers.dev"
       },
       "durable_objects": {
-        "bindings": [{ "name": "COUNTER_DO", "class_name": "CounterDO" }]
+        "bindings": [
+          { "name": "COUNTER_DO", "class_name": "CounterDO" },
+          { "name": "SERVER_DO", "class_name": "ServerDO" }
+        ]
       },
       "kv_namespaces": [
         { "binding": "OAUTH_KV", "id": "<client-oauth-kv-id>" },
