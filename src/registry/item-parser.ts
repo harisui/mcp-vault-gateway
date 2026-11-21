@@ -32,7 +32,8 @@ export function validateDownstreamUrl(value: string): string | undefined {
   if (u.username || u.password) return "url must not contain credentials";
   const host = u.hostname.toLowerCase();
   if (host === "localhost" || host.endsWith(".localhost")) return "url must not point at localhost";
-  if (/^[0-9.]+$/.test(host) || /^[0-9a-f:]+$/.test(host)) return "url must use a host name, not an IP address";
+  // URL keeps IPv6 literals in brackets ("[::1]"), so check for those as well as dotted IPv4.
+  if (host.startsWith("[") || /^[0-9.]+$/.test(host) || /^[0-9a-f:]+$/.test(host)) return "url must use a host name, not an IP address";
   if (!host.includes(".")) return "url must use a fully qualified host name";
   return undefined;
 }
