@@ -3,6 +3,7 @@ import { discoverGroups, type Env, type Settings, settings } from "./env";
 import { HourlyBudget } from "./onepassword/budget";
 import type { OpClient } from "./onepassword/client";
 import { SdkOpClient } from "./onepassword/sdk-client";
+import { ToolsCache } from "./proxy/tools-cache";
 import type { GroupState } from "./registry/registry";
 import { Registry } from "./registry/registry";
 
@@ -13,6 +14,7 @@ export interface App {
   ring: KeyRing;
   registry: Registry;
   budget: HourlyBudget;
+  tools: ToolsCache;
   publicUrl: string;
 }
 
@@ -48,7 +50,8 @@ async function buildApp(env: Env): Promise<App> {
   const clients: Record<string, OpClient> = {};
   for (const [group, token] of Object.entries(discoverGroups(env))) clients[group] = new SdkOpClient(group, token, budget);
   const registry = new Registry({ kv: env.CACHE_KV, ring, clients, ttlMs: cfg.cacheTtlMs });
-  return { env, cfg, ring, registry, budget, publicUrl: publicUrl(env) };
+  const tools = new ToolsCache(env.CACHE_KV, ring, cfg.toolsCacheTtlMs);
+  return { env, cfg, ring, registry, budget, tools, publicUrl: publicUrl(env) };
 }
 
 /** True when the email is listed in at least one group's valid _policy. */
