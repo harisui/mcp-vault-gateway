@@ -129,8 +129,9 @@ describe("401 auto-retry", () => {
 describe("call enforcement", () => {
   it("denies servers the caller is not allowed on, with the same message as unknown servers", async () => {
     const gw = await gateway(me);
-    const forbidden = await gw.call("personal.ledger", "get_x", {}).catch((e: Error) => e.message);
-    const unknown = await gw.call("personal.nope", "get_x", {}).catch((e: Error) => e.message);
+    const message = (p: Promise<unknown>) => p.then(() => "", (e: Error) => e.message);
+    const forbidden = await message(gw.call("personal.ledger", "get_x", {}));
+    const unknown = await message(gw.call("personal.nope", "get_x", {}));
     expect(forbidden).toContain("Unknown server");
     expect(forbidden.replace("ledger", "X")).toBe(unknown.replace("nope", "X"));
   });
