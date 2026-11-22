@@ -26,7 +26,7 @@ export interface ForwardDeps {
   publicUrl: string;
   registry: { reloadItem(group: string, itemId: string): Promise<ServerEntry | undefined> };
   /** Returns the server with usable credentials (refreshes OAuth tokens when needed). */
-  credentials(server: ServerEntry): Promise<ServerEntry>;
+  credentials(server: ServerEntry, opts?: { afterAuthFailure?: boolean }): Promise<ServerEntry>;
 }
 
 export function makeTarget(server: ServerEntry, cfg: Settings): Target {
@@ -74,7 +74,7 @@ export async function forward<T>(deps: ForwardDeps, server: ServerEntry, op: (t:
     log("warn", "downstream.reload_failed", { server: server.id, error: errorInfo(e).message });
   }
   if (fresh && fresh.status === "ok") {
-    const second = await op(makeTarget(await deps.credentials(fresh), deps.cfg));
+    const second = await op(makeTarget(await deps.credentials(fresh, { afterAuthFailure: true }), deps.cfg));
     if (second.ok) return second.value;
     if (second.kind !== "auth") throw new GatewayError(failureMessage(server, second, deps.cfg));
   }

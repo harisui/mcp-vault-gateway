@@ -2,6 +2,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { getApp } from "../app";
 import type { Env } from "../env";
 import type { Caller } from "../policy/caller";
+import { oauthCredentials } from "../oauth-downstream/refresh";
 import { durableDownstream } from "../proxy/forward";
 import { counter } from "../util/counter-do";
 import { Gateway } from "./gateway";
@@ -37,7 +38,7 @@ export const mcpApiHandler = {
         tools: app.tools,
         downstream: durableDownstream(env.SERVER_DO),
         limiter: { hit: async (name, windowMs, limit) => (await counter(env.COUNTER_DO, name).hit(windowMs, limit)).allowed },
-        credentials: async (server) => server,
+        credentials: (server, opts) => oauthCredentials(env.SERVER_DO, app.publicUrl, server, opts),
       },
       caller,
     );
