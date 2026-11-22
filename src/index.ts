@@ -4,6 +4,7 @@ import { parseAccessKey, verifyAccessKey } from "./auth/access-keys";
 import { handleAuthRoute } from "./auth/authorize";
 import type { Env } from "./env";
 import { mcpApiHandler } from "./mcp/handler";
+import { handleConnectRoute } from "./oauth-downstream/connect";
 import { messagePage } from "./util/html";
 import { errorInfo, log } from "./util/log";
 
@@ -19,6 +20,8 @@ const defaultHandler = {
     const path = new URL(req.url).pathname;
     const auth = await handleAuthRoute(req, app, path);
     if (auth) return auth;
+    const connect = await handleConnectRoute(req, app, path);
+    if (connect) return connect;
     return messagePage("Not found", "Nothing here.", 404);
   },
 };
