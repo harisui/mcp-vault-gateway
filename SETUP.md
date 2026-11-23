@@ -15,7 +15,7 @@ Everything below is done **once per environment**. The two must never share a va
 
 ## 0. Before you start
 
-- [ ] Cloudflare account on the **Workers Paid** plan. The 1Password SDK bundle is about 4.3 MB gzipped, which is over the 3 MB Free plan limit.
+- [ ] Cloudflare account on the **Workers Paid** plan. The 1Password SDK bundle is about 4.4 MB gzipped, which is over the 3 MB Free plan limit.
 - [ ] Node.js 22.12 or newer.
 - [ ] A 1Password Business or Teams account (Service Accounts are required).
 - [ ] A GitHub account whose **verified primary email** you will list in the policy.
